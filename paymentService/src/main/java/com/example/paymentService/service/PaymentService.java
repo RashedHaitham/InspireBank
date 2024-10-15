@@ -10,12 +10,15 @@ import com.example.paymentService.repository.PaymentRepository;
 import org.example.PaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Validated
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -29,6 +32,7 @@ public class PaymentService {
         this.paymentProducer = paymentProducer;
     }
 
+    @Transactional
     public Payment createPayment(String accountNumber, Double amount) {
         Payment payment = new Payment(accountNumber,amount, LocalDateTime.now());
         payment = paymentRepository.save(payment);
@@ -36,6 +40,8 @@ public class PaymentService {
         AccountUpdateRequest updateRequest = new AccountUpdateRequest();
         updateRequest.setAccountNumber(accountNumber);
         updateRequest.setInitialBalance(amount);
+
+        updateRequest.setEmployeeId(accountClient.getAccountByNumber(accountNumber).getEmployeeId());
 
         accountClient.updateAccount(accountNumber, updateRequest);
 
@@ -55,6 +61,7 @@ public class PaymentService {
         return paymentRepository.findAll();
     }
 
+    @Transactional
     public List<PaymentResponse> createPaymentsForAllEmployees(Double amount) {
 
         List<PaymentResponse> paymentResponses = new ArrayList<>();

@@ -8,11 +8,13 @@ import com.example.accountService.repository.AccountRepository;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Validated
 public class AccountService {
 
     private final AccountRepository accountRepository;

@@ -20,11 +20,14 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api")
 public class APIController {
 
-    @Autowired
-    private GatewayService gatewayService;
+    private final GatewayService gatewayService;
+    private final JWTUtil jwtUtil;
 
     @Autowired
-    private JWTUtil jwtUtil;
+    public APIController(JWTUtil jwtUtil, GatewayService gatewayService) {
+        this.jwtUtil = jwtUtil;
+        this.gatewayService = gatewayService;
+    }
 
     // POST /api/auth/login - User Login
     @PostMapping("/auth/login")
