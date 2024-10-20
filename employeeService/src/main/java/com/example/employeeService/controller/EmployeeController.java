@@ -3,21 +3,29 @@ package com.example.employeeService.controller;
 import com.example.employeeService.dto.EmployeeCreationRequest;
 import com.example.employeeService.model.Employee;
 import com.example.employeeService.service.EmployeeService;
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.IOException;
 
 
 @RestController
 @RequestMapping("/api/employee")
 public class EmployeeController {
 
+    private final EmployeeService employeeService;
+
+
     @Autowired
-    private EmployeeService employeeService;
+    public EmployeeController (EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
     @PostMapping
     public ResponseEntity<Employee> createEmployee(@Valid @RequestBody EmployeeCreationRequest request) {
@@ -25,14 +33,29 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadPayrollFile(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload a valid file.");
+        }
+         employeeService.saveEmployees(file);
+        return ResponseEntity.ok("Payroll file uploaded and saved successfully.");
+
+    }
+
+    @Timed(value = "employeeId", description = "The description of getting employee by id")
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
+    @Timed(value = "AllEmployee", description = "The description of getting employee by id")
     @GetMapping
-    public ResponseEntity<List<Employee>> getAllEmployees() {
-        return ResponseEntity.ok(employeeService.getAllEmployees());
+    public ResponseEntity<Page<Employee>> getAllEmployees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Page<Employee> employees = employeeService.getAllEmployees(page, size);
+        return ResponseEntity.ok(employees);
     }
 
     @PutMapping("/{id}")

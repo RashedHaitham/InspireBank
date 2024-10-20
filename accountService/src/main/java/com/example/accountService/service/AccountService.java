@@ -5,8 +5,12 @@ import com.example.accountService.dto.AccountCreationRequest;
 import com.example.accountService.dto.EmployeeResponse;
 import com.example.accountService.model.Account;
 import com.example.accountService.repository.AccountRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -73,9 +77,8 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-
+    @CacheEvict(key = "#id",value = "Account")
     public void deleteAccount(String id) {
-
         Optional<Account> optionalAccount = accountRepository.findById(id);
         if (optionalAccount.isEmpty()) {
             throw new ResourceNotFoundException("Account not found with ID: " + id);
@@ -84,8 +87,9 @@ public class AccountService {
         accountRepository.deleteById(id);
     }
 
+    @Cacheable(key = "#id",value = "Account")
     public Account getAccountById(String id) {
-
+        System.out.println("no cache, getting account number "+id+" from DB...");
         Optional<Account> optionalAccount = accountRepository.findById(id);
         if (optionalAccount.isEmpty()) {
             throw new ResourceNotFoundException("Account not found with ID: " + id);
@@ -93,8 +97,9 @@ public class AccountService {
         return optionalAccount.get();
     }
 
-
+    @Cacheable(value = "Account")
     public List<Account> getAllAccounts() {
+        System.out.println("no cache, getting all accounts from DB...");
         List<Account> optionalAccounts = accountRepository.findAll();
         if (optionalAccounts.isEmpty()) {
             throw new ResourceNotFoundException("No accounts found");

@@ -64,7 +64,7 @@ class AccountServiceApplicationTests {
 		AccountCreationRequest request = new AccountCreationRequest();
 		request.setAccountNumber("1234567890A");
 		request.setInitialBalance(1000.0);
-		request.setEmployeeId(2L);
+		request.setEmployeeId(36L);
 
 		Account response = restTemplate.postForObject(baseUrl, request, Account.class);
 

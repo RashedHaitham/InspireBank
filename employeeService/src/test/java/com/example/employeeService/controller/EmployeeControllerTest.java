@@ -10,6 +10,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -81,21 +84,26 @@ class EmployeeControllerTest {
         // Arrange
         Employee employee1 = new Employee(1L, "John Doe", "john.doe@example.com", "Developer");
         Employee employee2 = new Employee(2L, "Jane Doe", "jane.doe@example.com", "Manager");
+        List<Employee> employeeList = List.of(employee1, employee2);
 
-        when(employeeService.getAllEmployees()).thenReturn(List.of(employee1, employee2));
+        // Create a Page object with the list of employees
+        Page<Employee> employeePage = new PageImpl<>(employeeList, PageRequest.of(0, 5), employeeList.size());
+
+        // Mock the service call with paginated results
+        when(employeeService.getAllEmployees(0, 5)).thenReturn(employeePage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/employee"))
+        mockMvc.perform(get("/api/employees?page=0&size=5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("John Doe"))
-                .andExpect(jsonPath("$[0].email").value("john.doe@example.com"))
-                .andExpect(jsonPath("$[0].position").value("Developer"))
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].name").value("Jane Doe"))
-                .andExpect(jsonPath("$[1].email").value("jane.doe@example.com"))
-                .andExpect(jsonPath("$[1].position").value("Manager"));
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("John Doe"))
+                .andExpect(jsonPath("$.content[0].email").value("john.doe@example.com"))
+                .andExpect(jsonPath("$.content[0].position").value("Developer"))
+                .andExpect(jsonPath("$.content[1].id").value(2))
+                .andExpect(jsonPath("$.content[1].name").value("Jane Doe"))
+                .andExpect(jsonPath("$.content[1].email").value("jane.doe@example.com"))
+                .andExpect(jsonPath("$.content[1].position").value("Manager"));
     }
 
     @Test

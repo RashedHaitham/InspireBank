@@ -10,6 +10,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -42,48 +46,42 @@ class AccountControllerTest {
 
     @Test
     void createAccount_shouldReturnCreatedAccount() throws Exception {
-        // Arrange
-        AccountCreationRequest request = new AccountCreationRequest(123L, "acc123", 1000.0);
-        Account account = Account.builder().accountNumber("acc123").balance(1000.0).employeeId(123L).build();
+        AccountCreationRequest request = new AccountCreationRequest(123L, "acc1234567", 1000.0);
+        Account account = Account.builder().accountNumber("acc1234567").balance(1000.0).employeeId(123L).build();
 
         when(accountService.createAccount(any(AccountCreationRequest.class))).thenReturn(account);
 
-        // Act & Assert
         mockMvc.perform(post("/api/account")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accountNumber").value("acc123"))
+                .andExpect(jsonPath("$.accountNumber").value("acc1234567"))
                 .andExpect(jsonPath("$.balance").value(1000.0))
                 .andExpect(jsonPath("$.employeeId").value(123));
     }
 
     @Test
     void updateAccount_shouldReturnUpdatedAccount() throws Exception {
-        // Arrange
-        String accountId = "acc123";
-        AccountCreationRequest request = new AccountCreationRequest(123L, "acc456", 500.0);
-        Account updatedAccount = Account.builder().accountNumber("acc456").balance(1500.0).employeeId(123L).build();
+        String accountId = "acc1234567";
+        AccountCreationRequest request = new AccountCreationRequest(123L, "acc4567890", 500.0);
+        Account updatedAccount = Account.builder().accountNumber("acc4567890").balance(1500.0).employeeId(123L).build();
 
         when(accountService.updateAccount(eq(accountId), any(AccountCreationRequest.class))).thenReturn(updatedAccount);
 
-        // Act & Assert
         mockMvc.perform(put("/api/account/{id}", accountId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accountNumber").value("acc456"))
+                .andExpect(jsonPath("$.accountNumber").value("acc4567890"))
                 .andExpect(jsonPath("$.balance").value(1500.0))
                 .andExpect(jsonPath("$.employeeId").value(123));
     }
 
     @Test
     void deleteAccount_shouldReturnNoContent() throws Exception {
-        // Arrange
-        String accountId = "acc123";
+        String accountId = "acc1234567";
         doNothing().when(accountService).deleteAccount(accountId);
 
-        // Act & Assert
         mockMvc.perform(delete("/api/account/{id}", accountId))
                 .andExpect(status().isNoContent());
     }
@@ -96,7 +94,6 @@ class AccountControllerTest {
 
         when(accountService.getAccountById(accountId)).thenReturn(account);
 
-        // Act & Assert
         mockMvc.perform(get("/api/account/{id}", accountId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountNumber").value("acc123"))

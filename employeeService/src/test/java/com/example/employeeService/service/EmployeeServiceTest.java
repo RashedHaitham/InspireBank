@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,15 +89,20 @@ class EmployeeServiceTest {
         // Arrange
         Employee employee1 = new Employee(1L, "John Doe", "john.doe@example.com", "Developer");
         Employee employee2 = new Employee(2L, "Jane Doe", "jane.doe@example.com", "Manager");
+        List<Employee> employeeList = List.of(employee1, employee2);
 
-        when(employeeRepository.findAll()).thenReturn(List.of(employee1, employee2));
+        // Create a Page object with the list of employees
+        Page<Employee> employeePage = new PageImpl<>(employeeList, PageRequest.of(0, 5), employeeList.size());
+
+        // Mock the repository call to return a paginated result
+        when(employeeRepository.findAll(PageRequest.of(0, 5))).thenReturn(employeePage);
 
         // Act
-        List<Employee> employees = employeeService.getAllEmployees();
+        Page<Employee> employees = employeeService.getAllEmployees(0, 5);
 
         // Assert
-        assertEquals(2, employees.size());
-        verify(employeeRepository, times(1)).findAll();
+        assertEquals(2, employees.getContent().size());
+        verify(employeeRepository, times(1)).findAll(PageRequest.of(0, 5));
     }
 
     @Test
