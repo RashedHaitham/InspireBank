@@ -9,12 +9,23 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import feign.FeignException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
 public class AccountServiceExceptionHandler {
+
+    @ExceptionHandler(FeignException.NotFound.class)
+    public ResponseEntity<String> handleFeignNotFoundException(FeignException.NotFound ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found with the given ID.");
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<String> handleFeignException(FeignException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve employee data.");
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {

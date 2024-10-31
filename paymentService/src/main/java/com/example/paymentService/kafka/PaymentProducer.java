@@ -27,6 +27,7 @@ public class PaymentProducer {
         logger.info("Sending payment request: " + paymentRequest);
         Message<PaymentRequest> message = MessageBuilder.withPayload(paymentRequest)
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
+                .setHeader(KafkaHeaders.KEY, paymentRequest.getAccountNumber())
                 .build();
         kafkaTemplate.send(message);
     }

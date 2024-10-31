@@ -1,15 +1,18 @@
 package com.example.employeeService.service;
 
 import com.example.employeeService.dto.EmployeeCreationRequest;
+import com.example.employeeService.exception.EmployeeNotFoundException;
 import com.example.employeeService.model.Employee;
 import com.example.employeeService.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,22 +21,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Validated
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private static final String EMPLOYEE_CACHE = "Employee";
 
     @Autowired
     public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
 
+    @CachePut(value = EMPLOYEE_CACHE, key = "#result.id")
     public Employee createEmployee(EmployeeCreationRequest request) {
-       // validateEmployeeRequest(request);
-
         Employee employee = new Employee();
         employee.setName(request.getName());
         employee.setEmail(request.getEmail());
@@ -41,6 +43,7 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
+    @CachePut(value = EMPLOYEE_CACHE, key = "#result.id")
     public void saveEmployees(MultipartFile file) throws IOException {
         List<Employee> employees = new ArrayList<>();
 
@@ -52,33 +55,36 @@ public class EmployeeService {
                     isFirstLine = false;
                     continue;
                 }
-                 String[] data = line.split(",");
+                String[] data = line.split(",");
                 if (data.length == 3) {  // Assuming 3 columns: name, email, position
-                    Employee employee = new Employee(null, data[1],data[0], data[2]);
+                    Employee employee = new Employee(null, data[1], data[0], data[2]);
                     employees.add(employee);
                 }
             }
         }
         employeeRepository.saveAll(employees);
-
     }
 
-    @Cacheable(key = "#id",value = "Employee")
+    @Cacheable(key = "#id", value = EMPLOYEE_CACHE)
+    @Transactional(readOnly = true)
     public Employee getEmployeeById(Long id) {
-        System.out.println("no cache, getting employee "+id+ " form database...");
-        Optional<Employee> employee = employeeRepository.findById(id);
-        return employee.orElse(null);
+        if (!employeeRepository.existsById(id)) {
+            throw new EmployeeNotFoundException(id);
+        }
+        System.out.println("No cache, getting employee " + id + " from the database...");
+        return employeeRepository.findById(id).orElse(null);
     }
 
-    @Cacheable(value = "Employee")
+    @Cacheable(value = EMPLOYEE_CACHE, key = "#page + '-' + #size")
+    @Transactional(readOnly = true)
     public Page<Employee> getAllEmployees(int page, int size) {
         System.out.println("No cache, getting employees from the database...");
         Pageable pageable = PageRequest.of(page, size);
         return employeeRepository.findAll(pageable);
     }
 
+    @CachePut(value = EMPLOYEE_CACHE, key = "#id")
     public Employee updateEmployee(Long id, EmployeeCreationRequest request) {
-        //validateEmployeeRequest(request);
         Employee employee = getEmployeeById(id);
         employee.setName(request.getName());
         employee.setEmail(request.getEmail());
@@ -86,30 +92,12 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    @CacheEvict(key = "#id",value = "Employee")
+    @CacheEvict(value = EMPLOYEE_CACHE, key = "#id")
+    @Transactional
     public void deleteEmployee(Long id) {
+        if (!employeeRepository.existsById(id)) {
+            throw new EmployeeNotFoundException(id);
+        }
         employeeRepository.deleteById(id);
     }
-
-//    private void validateEmployeeRequest(EmployeeCreationRequest request) {
-//        if (request == null) {
-//            throw new ValidationException("Employee creation request cannot be null");
-//        }
-//
-//        if (request.getName() == null || request.getName().isBlank()) {
-//            throw new ValidationException("Employee name cannot be null or blank");
-//        }
-//
-//        if (request.getName().length() < 2 || request.getName().length() > 50) {
-//            throw new ValidationException("Employee name must be between 2 and 50 characters");
-//        }
-//
-//        if (request.getEmail() == null || !request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-//            throw new ValidationException("Invalid email format");
-//        }
-//
-//        if (request.getPosition() == null || request.getPosition().isBlank()) {
-//            throw new ValidationException("Position cannot be null or blank");
-//        }
-//    }
 }

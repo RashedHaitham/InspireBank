@@ -34,7 +34,6 @@ public class User {
 
     private String role;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Attribute(name = "userPassword")
     private String password;
 }

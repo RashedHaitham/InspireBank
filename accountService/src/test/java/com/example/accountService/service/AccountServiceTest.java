@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -138,22 +139,59 @@ class AccountServiceTest {
     }
 
     @Test
-    void getAllAccounts_shouldReturnAccountsSuccessfully() {
-        Account account1 = Account.builder().accountNumber("acc123").balance(500.0).employeeId(123L).build();
-        Account account2 = Account.builder().accountNumber("acc456").balance(1000.0).employeeId(456L).build();
+    void getAllAccounts_shouldReturnPaginatedAccountsSuccessfully() {
+        // Arrange
+        Account account1 = Account.builder()
+                .accountNumber("acc123")
+                .balance(500.0)
+                .employeeId(123L)
+                .build();
 
-        when(accountRepository.findAll()).thenReturn(List.of(account1, account2));
+        Account account2 = Account.builder()
+                .accountNumber("acc456")
+                .balance(1000.0)
+                .employeeId(456L)
+                .build();
 
-        List<Account> accounts = accountService.getAllAccounts();
+        List<Account> accounts = List.of(account1, account2);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("balance").ascending());
+        Page<Account> accountsPage = new PageImpl<>(accounts, pageable, accounts.size());
 
-        assertEquals(2, accounts.size());
-        verify(accountRepository, times(1)).findAll();
+        when(accountRepository.findAll(pageable)).thenReturn(accountsPage);
+
+        // Act
+        Page<Account> result = accountService.getAllAccounts(pageable);
+
+        // Assert
+        assertNotNull(result, "The result should not be null");
+        assertEquals(2, result.getContent().size(), "There should be 2 accounts in the result");
+        assertEquals("acc123", result.getContent().get(0).getAccountNumber(), "First account number should be acc123");
+        assertEquals(500.0, result.getContent().get(0).getBalance(), "First account balance should be 500.0");
+        assertEquals(123L, result.getContent().get(0).getEmployeeId(), "First account employeeId should be 123L");
+        assertEquals("acc456", result.getContent().get(1).getAccountNumber(), "Second account number should be acc456");
+        assertEquals(1000.0, result.getContent().get(1).getBalance(), "Second account balance should be 1000.0");
+        assertEquals(456L, result.getContent().get(1).getEmployeeId(), "Second account employeeId should be 456L");
+
+        // Verify that the repository's findAll method was called once with the correct pageable
+        verify(accountRepository, times(1)).findAll(pageable);
     }
 
     @Test
     void getAllAccounts_shouldThrowExceptionIfNoAccountsFound() {
-        when(accountRepository.findAll()).thenReturn(List.of());
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("balance").ascending());
+        Page<Account> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-        assertThrows(ResourceNotFoundException.class, () -> accountService.getAllAccounts());
+        when(accountRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            accountService.getAllAccounts(pageable);
+        }, "Expected getAllAccounts to throw ResourceNotFoundException when no accounts are found");
+
+        assertEquals("No accounts found", exception.getMessage(), "Exception message should match the expected value");
+
+        // Verify that the repository's findAll method was called once with the correct pageable
+        verify(accountRepository, times(1)).findAll(pageable);
     }
 }

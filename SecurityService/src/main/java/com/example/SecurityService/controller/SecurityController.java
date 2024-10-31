@@ -25,14 +25,16 @@ import java.util.stream.Collectors;
 public class SecurityController {
 
 
-    @Autowired
-    private ReactiveAuthenticationManager reactiveAuthenticationManager;
+    private final ReactiveAuthenticationManager reactiveAuthenticationManager;
+    private final JWTUtil jwtUtil;
+    private final UserService userService;
 
     @Autowired
-    private JWTUtil jwtUtil;
-
-    @Autowired
-    private UserService userService;
+    public SecurityController(UserService userService, ReactiveAuthenticationManager reactiveAuthenticationManager,JWTUtil jwtUtil) {
+        this.userService=userService;
+        this.reactiveAuthenticationManager=reactiveAuthenticationManager;
+        this.jwtUtil=jwtUtil;
+    }
 
     @PostMapping("/authenticate")
     public Mono<ResponseEntity<AuthResponse>> authenticate(@RequestBody AuthRequest authRequest) {
@@ -42,7 +44,6 @@ public class SecurityController {
         return reactiveAuthenticationManager.authenticate(authToken)
                 .flatMap(authentication -> userService.findByUsername(authRequest.getUsername())
                         .flatMap(user -> {
-                            System.out.println(user);
                             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
                             return jwtUtil.generateToken(Mono.just(user), authorities)
                                     .map(token -> ResponseEntity.ok(new AuthResponse(token)));
@@ -64,7 +65,9 @@ public class SecurityController {
     @PostMapping("/refresh-token")
     public Mono<ResponseEntity<AuthResponse>> refreshToken(@CookieValue("jwtToken") String refreshToken) {
         String username = jwtUtil.extractUsername(refreshToken);
-
+       if (!jwtUtil.validateToken(refreshToken,username)){
+           return Mono.error(new Exception("Invalid token"));
+       }
         return userService.findByUsername(username)
                 .flatMap(user -> {
                     Collection<? extends GrantedAuthority> authorities = jwtUtil.extractRoles(refreshToken)

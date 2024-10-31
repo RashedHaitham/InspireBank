@@ -102,22 +102,51 @@ class AccountControllerTest {
     }
 
     @Test
-    void getAllAccounts_shouldReturnListOfAccounts() throws Exception {
+    void getAllAccounts_shouldReturnPaginatedAccounts() throws Exception {
         // Arrange
-        Account account1 = Account.builder().accountNumber("acc123").balance(500.0).employeeId(123L).build();
-        Account account2 = Account.builder().accountNumber("acc456").balance(1500.0).employeeId(456L).build();
+        Account account1 = Account.builder()
+                .accountNumber("acc123")
+                .balance(500.0)
+                .employeeId(123L)
+                .build();
 
-        when(accountService.getAllAccounts()).thenReturn(List.of(account1, account2));
+        Account account2 = Account.builder()
+                .accountNumber("acc456")
+                .balance(1500.0)
+                .employeeId(456L)
+                .build();
+
+        List<Account> accounts = List.of(account1, account2);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("balance").ascending());
+        Page<Account> accountsPage = new PageImpl<>(accounts, pageable, 2);
+
+        when(accountService.getAllAccounts(any(Pageable.class))).thenReturn(accountsPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/account/all"))
+        mockMvc.perform(get("/api/accounts/all")
+                        .param("page", "0")
+                        .param("size", "2")
+                        .param("sort", "balance,asc")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].accountNumber").value("acc123"))
-                .andExpect(jsonPath("$[0].balance").value(500.0))
-                .andExpect(jsonPath("$[0].employeeId").value(123))
-                .andExpect(jsonPath("$[1].accountNumber").value("acc456"))
-                .andExpect(jsonPath("$[1].balance").value(1500.0))
-                .andExpect(jsonPath("$[1].employeeId").value(456));
+                // Verify pagination metadata
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].accountNumber").value("acc123"))
+                .andExpect(jsonPath("$.content[0].balance").value(500.0))
+                .andExpect(jsonPath("$.content[0].employeeId").value(123))
+                .andExpect(jsonPath("$.content[1].accountNumber").value("acc456"))
+                .andExpect(jsonPath("$.content[1].balance").value(1500.0))
+                .andExpect(jsonPath("$.content[1].employeeId").value(456))
+                // Verify pagination details
+                .andExpect(jsonPath("$.pageable.pageNumber").value(0))
+                .andExpect(jsonPath("$.pageable.pageSize").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.last").value(true))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.numberOfElements").value(2))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.empty").value(false));
     }
 }

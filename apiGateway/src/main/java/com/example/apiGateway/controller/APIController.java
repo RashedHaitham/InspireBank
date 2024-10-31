@@ -1,5 +1,6 @@
 package com.example.apiGateway.controller;
 
+import com.example.apiGateway.exception.UserNotFoundException;
 import com.example.apiGateway.model.AuthRequest;
 import com.example.apiGateway.model.AuthResponse;
 import com.example.apiGateway.model.User;
@@ -37,7 +38,10 @@ public class APIController {
                     if (authResponse.getBody() != null) {
                         String token = authResponse.getBody().getToken();
                         System.out.println("token "+token);
-                        ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
+                        if (token == null || !isValidToken(token)) {
+                            return Mono.error(new UserNotFoundException(token));
+                        }
+                            ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
                                 .httpOnly(true)
                                 .path("/")
                                 .maxAge(10 * 60 * 60)  // Token expiration (10 hours)
@@ -51,6 +55,10 @@ public class APIController {
                 });
     }
 
+    private boolean isValidToken(String token) {
+        return !token.contains(" ");
+    }
+
     // POST /api/auth/signup - User Signup
     @PostMapping("/auth/signup")
     public Mono<ResponseEntity<String>> signup(@RequestBody User user) {
@@ -59,8 +67,8 @@ public class APIController {
 
     // POST /api/refresh-token - Refresh JWT Token
     @PostMapping("/refresh-token")
-    public Mono<ResponseEntity<AuthResponse>> refreshToken(@CookieValue("jwtToken") String refreshToken) {
-        return gatewayService.refreshToken(refreshToken);
+    public Mono<ResponseEntity<AuthResponse>> refreshToken(@CookieValue("jwtToken") String token) {
+        return gatewayService.refreshToken(token);
     }
 
     // GET /api/users - Get all users
@@ -74,7 +82,7 @@ public class APIController {
         return "test";
     }
 
-    @DeleteMapping("/users/{username}")
+    @DeleteMapping("/user/{username}")
     public Mono<ResponseEntity<String>> deleteUser(@PathVariable String username) {
         return gatewayService.deleteUser(username);
     }

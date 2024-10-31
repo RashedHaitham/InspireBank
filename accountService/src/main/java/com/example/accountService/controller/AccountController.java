@@ -32,16 +32,23 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(account);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(@PathVariable String id,@Valid @RequestBody AccountCreationRequest request) {
-        Account updatedAccount = accountService.updateAccount(id, request);
+    @PutMapping("/{accountNumber}")
+    public ResponseEntity<Account> updateAccount(@PathVariable String accountNumber,@Valid @RequestBody AccountCreationRequest request) {
+        Account updatedAccount = accountService.updateAccount(accountNumber, request);
+        return ResponseEntity.ok(updatedAccount);
+    }
+
+    @PostMapping("/{accountNumber}")
+    public ResponseEntity<Account> updateBalance(@PathVariable String accountNumber,@RequestBody Double amount) {
+        Account updatedAccount = accountService.updateBalance(accountNumber, amount);
+        System.out.println(updatedAccount);
         return ResponseEntity.ok(updatedAccount);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable String id) {
+    public ResponseEntity<String> deleteAccount(@PathVariable String id) {
         accountService.deleteAccount(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("account deleted");
     }
 
     @GetMapping("/{accountNumber}")
@@ -51,8 +58,8 @@ public class AccountController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Account>> getAllAccounts() {
-        List<Account>accounts=accountService.getAllAccounts();
+    public ResponseEntity<Page<Account>> getAllAccounts(Pageable pageable) {
+        Page<Account> accounts = accountService.getAllAccounts(pageable);
         return ResponseEntity.ok(accounts);
     }
 }

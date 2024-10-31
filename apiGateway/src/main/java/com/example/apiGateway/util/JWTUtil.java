@@ -14,11 +14,11 @@ import java.util.function.Function;
 @Component
 public class JWTUtil {
 
-    private String secret = "GAzmNPg574X3riPuD5/zGcU1+QShdbOEvTHPgr2PMOs=";  // Load secret from environment variable
+    private String secret = "GAzmNPg574X3riPuD5/zGcU1+QShdbOEvTHPgr2PMOs=";
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);  // Decode the base64-encoded secret
-        return Keys.hmacShaKeyFor(keyBytes);  // Recreate the key
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String extractUsername(String token) {

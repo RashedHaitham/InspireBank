@@ -30,8 +30,8 @@ public class KafkaConfig {
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
 
         JsonDeserializer<PaymentRequest> deserializer = new JsonDeserializer<>(PaymentRequest.class);
-        deserializer.addTrustedPackages("*");
-        deserializer.setRemoveTypeHeaders(false);
+        deserializer.addTrustedPackages("com.example");
+        deserializer.setRemoveTypeHeaders(true);
 
         return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
     }

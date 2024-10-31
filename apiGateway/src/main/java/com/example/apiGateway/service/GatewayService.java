@@ -35,7 +35,7 @@ public class GatewayService {
                 .uri(securityServiceUrl)
                 .bodyValue(authRequest)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new RuntimeException("Invalid username or password")))
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new UserNotFoundException("Invalid username or password")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new RuntimeException("Error communicating with security service")))
                 .bodyToMono(AuthResponse.class)
                 .map(ResponseEntity::ok)

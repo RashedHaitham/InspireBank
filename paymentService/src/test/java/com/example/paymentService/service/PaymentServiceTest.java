@@ -13,6 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,7 +55,7 @@ class PaymentServiceTest {
         payment.setId(1L);
 
         when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-        doNothing().when(accountClient).updateAccount(eq(accountNumber), any(AccountUpdateRequest.class));
+        doNothing().when(accountClient).updateBalance(eq(accountNumber),amount);
         doNothing().when(paymentProducer).sendPayment(any(PaymentRequest.class));
 
         // Act
@@ -63,7 +67,7 @@ class PaymentServiceTest {
         assertEquals(accountNumber, createdPayment.getAccountNumber());
         assertEquals(amount, createdPayment.getAmount());
         verify(paymentRepository, times(1)).save(any(Payment.class));
-        verify(accountClient, times(1)).updateAccount(eq(accountNumber), any(AccountUpdateRequest.class));
+        verify(accountClient, times(1)).updateBalance(eq(accountNumber),amount);
         verify(paymentProducer, times(1)).sendPayment(any(PaymentRequest.class));
     }
 
@@ -126,13 +130,22 @@ class PaymentServiceTest {
 
         List<Account> accounts = List.of(account1, account2);
 
-        when(accountClient.getAllAccounts()).thenReturn(accounts);
+        // Create a pageable list (single page) to simulate paginated response
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Account> accountPage = new PageImpl<>(accounts, pageable, accounts.size());
+
+        // Mock the paginated response
+        when(accountClient.getAllAccounts(any(Pageable.class))).thenReturn(accountPage);
+
+        // Mock save behavior for payment repository
         when(paymentRepository.save(any(Payment.class))).thenAnswer(i -> {
             Payment savedPayment = i.getArgument(0);
             savedPayment.setId(savedPayment.getAccountNumber().equals("acc123") ? 1L : 2L);
             return savedPayment;
         });
-        doNothing().when(accountClient).updateAccount(anyString(), any(AccountUpdateRequest.class));
+
+        // Mock behavior for updating account and sending payment
+        doNothing().when(accountClient).updateBalance(anyString(),amount );
         doNothing().when(paymentProducer).sendPayment(any(PaymentRequest.class));
 
         // Act
@@ -144,7 +157,9 @@ class PaymentServiceTest {
         assertEquals("acc123", paymentResponses.get(0).getAccountNumber());
         assertEquals(amount, paymentResponses.get(0).getAmount());
         assertEquals("acc456", paymentResponses.get(1).getAccountNumber());
-        verify(accountClient, times(2)).updateAccount(anyString(), any(AccountUpdateRequest.class));
+
+        // Verify each method call was made twice, once per account
+        verify(accountClient, times(2)).updateBalance(anyString(),amount);
         verify(paymentProducer, times(2)).sendPayment(any(PaymentRequest.class));
         verify(paymentRepository, times(2)).save(any(Payment.class));
     }

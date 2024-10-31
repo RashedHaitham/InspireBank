@@ -12,6 +12,13 @@
     <description>A shared module for common entities used across services.</description>
 
     <dependencies>
+
         <!-- Add any dependencies required for the common module -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

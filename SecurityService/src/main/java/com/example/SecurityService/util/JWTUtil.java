@@ -76,12 +76,12 @@ public class JWTUtil {
     }
 
     public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);  // No try-catch block
+        final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 
     public List<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        return (List<String>) claims.get("roles");  // Assuming roles are stored in the "roles" claim
+        return (List<String>) claims.get("roles");
     }
 }

@@ -25,11 +25,14 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchanges -> exchanges
+                .authorizeExchange(exchange -> exchange
                         .pathMatchers("/api/auth/**").permitAll()
-                        .pathMatchers(HttpMethod.POST,"/api/employee/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.DELETE,"/api/employee/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.PUT,"/api/employee/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.POST, "/api/user/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/api/user/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/api/user/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.POST, "/api/employee/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/api/employee/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/api/employee/**").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
