@@ -70,13 +70,6 @@ public class JWTFilter implements WebFilter {
                 .switchIfEmpty(chain.filter(exchange));  // If no JWT, proceed with the request
     }
 
-    private Mono<Void> setForbiddenResponse(ServerWebExchange exchange) {
-        // Set the status code early to avoid the UnsupportedOperationException
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        // Complete the response without further processing
-        return exchange.getResponse().setComplete();
-    }
-
     private Optional<HttpCookie> getJwtTokenFromRequest(ServerHttpRequest request) {
         return Optional.ofNullable(request.getCookies().getFirst("jwtToken"));
     }

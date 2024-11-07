@@ -1,4 +1,4 @@
-package com.example.notificationService.config;
+/*package com.example.notificationService.config;
 
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -43,3 +43,4 @@ public class KafkaConfig {
         return factory;
     }
 }
+*/

@@ -21,11 +21,14 @@ import java.util.Optional;
 @Service
 public class GatewayService {
 
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    private final WebClient.Builder webClientBuilder;
+    private final JWTUtil jwtUtil;
 
     @Autowired
-    private JWTUtil jwtUtil;
+    public GatewayService(WebClient.Builder webClientBuilder, JWTUtil jwtUtil) {
+        this.webClientBuilder = webClientBuilder;
+        this.jwtUtil = jwtUtil;
+    }
 
     public Mono<ResponseEntity<AuthResponse>> login(AuthRequest authRequest) {
         String securityServiceUrl = "http://localhost:8088/security/authenticate";

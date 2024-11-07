@@ -2,12 +2,10 @@ package com.example.paymentService.service;
 
 import com.example.paymentService.client.AccountClient;
 import com.example.paymentService.dto.Account;
-import com.example.paymentService.dto.AccountUpdateRequest;
 import com.example.paymentService.dto.PaymentResponse;
 import com.example.paymentService.kafka.PaymentProducer;
 import com.example.paymentService.model.Payment;
 import com.example.paymentService.repository.PaymentRepository;
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.example.PaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,22 +37,30 @@ public class PaymentService {
 
     @Transactional
     public Payment createPayment(String accountNumber, Double amount) {
+
         Payment payment = new Payment(accountNumber,amount, LocalDateTime.now());
         payment = paymentRepository.save(payment);
+        boolean paymentMade = false;
+        try {
+            accountClient.updateBalance(accountNumber, amount);
+            paymentMade = true;
 
-
-        accountClient.updateBalance(accountNumber, amount);
-
-        PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setAmount(amount);
-        paymentRequest.setAccountNumber(accountNumber);
-        paymentProducer.sendPayment(paymentRequest);
-
+            PaymentRequest paymentRequest = new PaymentRequest();
+            paymentRequest.setAmount(amount);
+            paymentRequest.setAccountNumber(accountNumber);
+            paymentProducer.sendPayment(paymentRequest);
+        } catch (Exception e) {
+            if (paymentMade) {
+                accountClient.rollbackBalance(accountNumber, amount);
+            }
+            throw new RuntimeException("Transaction failed, rolling back changes.", e);
+        }
         return payment;
     }
 
     public List<Payment> getPaymentsByAccountNumber(String accountNumber) {
         List<Payment> account=paymentRepository.findByAccountNumber(accountNumber);
+        System.out.println(accountNumber);
         if (account.isEmpty()){
             throw new NoSuchElementException("No payment history found for account number: " + accountNumber);
         }

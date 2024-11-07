@@ -1,0 +1,16 @@
+type Payment {
+    id: ID!
+    accountNumber: String!
+    amount: Float!
+    timestamp: String!
+}
+
+type Query {
+    getPaymentsByAccountNumber(id: ID!): [Payment]
+    getAllPayments: [Payment!]!
+}
+
+type Mutation {
+    createPaymentsForAllEmployees( amount: Float!): Payment
+    createPayment(accountNumber: String!, amount: Float!): Payment
+}

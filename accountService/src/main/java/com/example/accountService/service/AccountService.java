@@ -115,4 +115,15 @@ public class AccountService {
         }
         return accountsPage;
     }
+
+    @CachePut(value = ACCOUNT_CACHE, key = "#accountNumber")
+    public Account rollbackBalance(String accountNumber, Double amount) {
+        Account account = accountRepository.findById(accountNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with number: " + accountNumber));
+
+        Double newBalance = account.getBalance() - amount;
+        account.setBalance(newBalance);
+
+        return accountRepository.save(account);
+    }
 }

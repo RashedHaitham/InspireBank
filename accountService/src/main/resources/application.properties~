@@ -21,6 +21,4 @@ eureka.instance.hostname=localhost
 
 spring.graphql.path=/api/account/graphql
 
-spring.graphql.graphiql.enabled=true
-spring.graphql.schema.introspection.enabled=true
 

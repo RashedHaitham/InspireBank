@@ -1,0 +1,44 @@
+scalar Upload
+
+
+type Employee {
+    id: ID!
+    email: String!
+    name: String
+    position: String
+}
+
+input EmployeeCreationRequest {
+    email: String!
+    name: String
+    position: String
+}
+
+type PageInfo {
+    totalPages: Int!
+    totalElements: Int!
+    pageSize: Int!
+    currentPage: Int!
+}
+
+
+type PaginatedEmployees {
+    content: [Employee!]!
+    totalPages: Int!
+    totalElements: Int!
+    number: Int!
+    size: Int!
+    numberOfElements: Int!
+}
+
+type Query {
+    getEmployeeById(id: ID!): Employee
+    getAllEmployees(first: Int = 0, after: Int = 5): PaginatedEmployees!
+}
+
+type Mutation {
+    createEmployee(input: EmployeeCreationRequest!): Employee!
+    updateEmployee(id: ID!, input: EmployeeCreationRequest!): Employee
+    deleteEmployee(id: ID!): Boolean!
+    uploadPayrollFile(file: Upload!): String!
+}

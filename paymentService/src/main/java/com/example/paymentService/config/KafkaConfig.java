@@ -1,4 +1,4 @@
-package com.example.paymentService.config;
+/*package com.example.paymentService.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -30,3 +30,4 @@ public class KafkaConfig {
     }
 
 }
+*/

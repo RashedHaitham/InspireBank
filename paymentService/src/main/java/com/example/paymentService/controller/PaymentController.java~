@@ -35,7 +35,7 @@ public class PaymentController {
     }
 
     @GetMapping("/employee/{accountNumber}")
-    public ResponseEntity<List<Payment>> getPaymentsByAccountNumber(@PathVariable String accountNumber) {
+    public ResponseEntity<List<Payment>> getPaymentsByEmployeeId(@PathVariable String accountNumber) {
         List<Payment> payments = paymentService.getPaymentsByAccountNumber(accountNumber);
         return ResponseEntity.ok(payments);
     }

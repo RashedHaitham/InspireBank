@@ -2,6 +2,7 @@ package com.example.notificationService.kafka;
 
 import com.example.notificationService.model.Notification;
 import org.example.PaymentRequest;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,19 @@ public class NotificationConsumer {
         logger.info("Sending notification to user: " + message);
     }
 
-    @KafkaListener(topics = "payment-topic", groupId = "paymentService")
+    /*@KafkaListener(topics = "payment-topic", groupId = "paymentService")
     public void consumeNotification(PaymentRequest paymentRequest) {
         logger.info("Received payment notification: " + paymentRequest);
+
+        Notification notificationMessage = createNotificationMessage(paymentRequest.getAccountNumber(),
+                paymentRequest.getAmount());
+
+        sendNotificationToUser(notificationMessage);
+    }*/
+
+    @RabbitListener(queues = "${rabbitmq.queue.name}")
+    public void consumeNotification(PaymentRequest paymentRequest) {
+        System.out.println("Received message: " + paymentRequest);
 
         Notification notificationMessage = createNotificationMessage(paymentRequest.getAccountNumber(),
                 paymentRequest.getAmount());

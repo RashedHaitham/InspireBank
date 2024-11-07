@@ -22,11 +22,9 @@ import reactor.core.publisher.Mono;
 public class APIController {
 
     private final GatewayService gatewayService;
-    private final JWTUtil jwtUtil;
 
     @Autowired
-    public APIController(JWTUtil jwtUtil, GatewayService gatewayService) {
-        this.jwtUtil = jwtUtil;
+    public APIController(GatewayService gatewayService) {
         this.gatewayService = gatewayService;
     }
 
@@ -37,7 +35,6 @@ public class APIController {
                 .flatMap(authResponse -> {
                     if (authResponse.getBody() != null) {
                         String token = authResponse.getBody().getToken();
-                        System.out.println("token "+token);
                         if (token == null || !isValidToken(token)) {
                             return Mono.error(new UserNotFoundException(token));
                         }
@@ -49,7 +46,6 @@ public class APIController {
 
                         response.addCookie(jwtCookie);
 
-                        System.out.println(jwtUtil.extractRoles(token));
                     }
                     return Mono.just(authResponse);
                 });

@@ -16,18 +16,30 @@ public class ApiGatewayApplication {
 		SpringApplication.run(ApiGatewayApplication.class, args);
 	}
 
+//	@Bean
+//	public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+//		return builder.routes()
+//				.route("employee", r -> r.path("/api/employee/**")
+//						.uri("lb://employeeService"))
+//				.route("account", r -> r.path("/api/account/**")
+//						.uri("lb://accountService"))
+//				.route("payment", r -> r.path("/api/payment/**")
+//						.uri("lb://paymentService"))
+//				.build();
+//	}
+
+
 	@Bean
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
 		return builder.routes()
-				.route("employee", r -> r.path("/api/employee/**")
+				.route("employee-graphql", r -> r.path("/api/employee/graphql")
 						.uri("lb://employeeService"))
-				.route("account", r -> r.path("/api/account/**")
+				.route("account-graphql", r -> r.path("/api/account/graphql")
 						.uri("lb://accountService"))
-				.route("payment", r -> r.path("/api/payment/**")
+				.route("payment-graphql", r -> r.path("/api/payment/graphql")
 						.uri("lb://paymentService"))
 				.build();
 	}
-
 
 
 	@Bean
