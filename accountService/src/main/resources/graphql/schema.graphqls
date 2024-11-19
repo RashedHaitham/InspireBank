@@ -1,33 +1,21 @@
-# Account type representing the Account entity in the system
 type Account {
     accountNumber: String!
     balance: Float!
     employeeId: ID!
 }
 
-# Input type for creating a new account
 input AccountCreationRequestInput {
     employeeId: ID!
     accountNumber: String!
     initialBalance: Float!
 }
 
-# Employee type representing employee details
 type EmployeeResponse {
     id: ID!
     name: String!
     email: String!
     position: String!
 }
-
-# Response page information for paginated results
-type PageInfo {
-    totalElements: Int!
-    totalPages: Int!
-    numberOfElements: Int!
-    currentPage: Int!
-}
-
 
 type AccountPage {
     content: [Account!]!
@@ -38,14 +26,12 @@ type AccountPage {
     numberOfElements: Int!
 }
 
-# Queries available for retrieving data
 type Query {
     getAccountByNumber(accountNumber: String!): Account
     getAllAccounts(page: Int = 0, size: Int = 5): AccountPage
     getEmployeeById(id: ID!): EmployeeResponse
 }
 
-# Mutations available for creating or modifying data
 type Mutation {
     createAccount(request: AccountCreationRequestInput!): Account!
     updateAccount(accountNumber: String!, request: AccountCreationRequestInput!): Account!

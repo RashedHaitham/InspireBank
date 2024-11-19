@@ -3,7 +3,6 @@ package com.example.notificationService.kafka;
 import com.example.notificationService.model.Notification;
 import org.example.PaymentRequest;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.logging.Logger;

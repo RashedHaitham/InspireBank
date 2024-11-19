@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/api/auth/**").permitAll()
-                        .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/actuator/prometheus").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/user/**").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/api/user/**").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.PUT, "/api/user/**").hasRole("ADMIN")

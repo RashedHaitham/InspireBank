@@ -10,10 +10,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,12 +27,13 @@ public class EmployeeGraphQLController {
 
 
     @QueryMapping
+    @Timed(value = "employeeGetById", description = "Time taken to get an employee by ID")
     public Employee getEmployeeById(@Argument Long id) {
         return employeeService.getEmployeeById(id);
     }
 
     @QueryMapping
-    @Timed(value = "AllEmployee", description = "The description of getting employee by id")
+    @Timed(value = "employeeGetAll", description = "Time taken to get all employees")
     public Page<Employee> getAllEmployees(
             @Argument int page,
             @Argument int size) {
@@ -47,16 +45,19 @@ public class EmployeeGraphQLController {
     }
 
     @MutationMapping
+    @Timed(value = "employeeCreate", description = "Time taken to create an employee")
     public Employee createEmployee(@Argument EmployeeCreationRequest input) {
         return employeeService.createEmployee(input);
     }
 
     @MutationMapping
+    @Timed(value = "employeeUpdate", description = "Time taken to update an employee")
     public Employee updateEmployee(@Argument Long id,@Argument EmployeeCreationRequest input) {
         return employeeService.updateEmployee(id, input);
     }
 
     @MutationMapping
+    @Timed(value = "employeeDelete", description = "Time taken to delete an employee")
     public Boolean deleteEmployee(@Argument Long id) {
         employeeService.deleteEmployee(id);
         return true;

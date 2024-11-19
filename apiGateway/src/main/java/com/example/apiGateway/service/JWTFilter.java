@@ -41,11 +41,9 @@ public class JWTFilter implements WebFilter {
                     String username = jwtUtil.extractUsername(token);
                     if (jwtUtil.validateToken(token, username)) {
 
-                        // Extract the username from the path if the path matches the user profile pattern
                         if (path.matches("/profile/\\w+")) {
-                            String pathUsername = path.split("/")[2]; // Extract username from path
+                            String pathUsername = path.split("/")[2];
                             if (!username.equals(pathUsername)) {
-                                // If the username in the JWT does not match the one in the path, return 403 Forbidden
                                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                                 return exchange.getResponse().setComplete();
                             }
@@ -53,7 +51,7 @@ public class JWTFilter implements WebFilter {
 
                         List<String> roles = jwtUtil.extractRoles(token);
                         List<GrantedAuthority> authorities = roles.stream()
-                                .map(SimpleGrantedAuthority::new)  // Convert each role to a GrantedAuthority
+                                .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList());
 
                         Authentication auth =
@@ -67,7 +65,7 @@ public class JWTFilter implements WebFilter {
 
                     return chain.filter(exchange);
                 })
-                .switchIfEmpty(chain.filter(exchange));  // If no JWT, proceed with the request
+                .switchIfEmpty(chain.filter(exchange));
     }
 
     private Optional<HttpCookie> getJwtTokenFromRequest(ServerHttpRequest request) {

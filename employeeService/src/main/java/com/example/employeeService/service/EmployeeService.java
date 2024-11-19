@@ -4,6 +4,7 @@ import com.example.employeeService.dto.EmployeeCreationRequest;
 import com.example.employeeService.exception.EmployeeNotFoundException;
 import com.example.employeeService.model.Employee;
 import com.example.employeeService.repository.EmployeeRepository;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -13,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Validated
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -56,7 +55,7 @@ public class EmployeeService {
                     continue;
                 }
                 String[] data = line.split(",");
-                if (data.length == 3) {  // Assuming 3 columns: name, email, position
+                if (data.length == 3) {  // 3 columns: name, email, position
                     Employee employee = new Employee(null, data[1], data[0], data[2]);
                     employees.add(employee);
                 }
@@ -65,6 +64,7 @@ public class EmployeeService {
         employeeRepository.saveAll(employees);
     }
 
+    @Timed("employeeCacheGet")
     @Cacheable(key = "#id", value = EMPLOYEE_CACHE)
     @Transactional(readOnly = true)
     public Employee getEmployeeById(Long id) {
@@ -75,6 +75,7 @@ public class EmployeeService {
         return employeeRepository.findById(id).orElse(null);
     }
 
+    @Timed("employeeCacheGetAll")
     @Cacheable(value = EMPLOYEE_CACHE, key = "#page + '-' + #size")
     @Transactional(readOnly = true)
     public Page<Employee> getAllEmployees(int page, int size) {
