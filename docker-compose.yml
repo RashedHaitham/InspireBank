@@ -116,3 +116,10 @@ services:
     ports:
       - "6379:6379"
     restart: on-failure
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    restart: on-failure

@@ -120,7 +120,7 @@ class AccountControllerTest {
         when(accountService.getAllAccounts(any(Pageable.class))).thenReturn(accountsPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/account/all")
+        mockMvc.perform(get("/api/accounts/all")
                         .param("page", "0")
                         .param("size", "2")
                         .param("sort", "balance,asc")

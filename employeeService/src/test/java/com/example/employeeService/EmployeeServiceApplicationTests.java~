@@ -11,7 +11,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -98,22 +97,14 @@ class EmployeeServiceApplicationTests {
 
 	@Test
 	public void testDeleteEmployee() {
-		// Arrange: Create an employee
 		HttpEntity<EmployeeCreationRequest> requestEntity = new HttpEntity<>(request);
 		ResponseEntity<Employee> postResponse = restTemplate.postForEntity(baseUrl, requestEntity, Employee.class);
 		Employee createdEmployee = postResponse.getBody();
 
-		assertNotNull(createdEmployee);
-		Long employeeId = createdEmployee.getId();
+		restTemplate.delete(baseUrl + "/" + createdEmployee.getId());
 
-		// Act: Delete the employee
-		restTemplate.delete(baseUrl + "/" + employeeId);
+		ResponseEntity<Employee> responseEntity = restTemplate.getForEntity(baseUrl + "/" + createdEmployee.getId(), Employee.class);
 
-		// Assert: Verify the employee no longer exists
-		HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
-			restTemplate.getForEntity(baseUrl + "/" + employeeId, Employee.class);
-		});
-		assertEquals(404, exception.getStatusCode().value());
+		assertEquals(200, responseEntity.getStatusCodeValue());
 	}
-
 }

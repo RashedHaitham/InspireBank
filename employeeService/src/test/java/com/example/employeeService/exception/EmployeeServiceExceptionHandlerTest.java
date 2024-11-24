@@ -56,9 +56,11 @@ class EmployeeServiceExceptionHandlerTest {
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         EmployeeServiceExceptionHandler.ErrorResponse body = (EmployeeServiceExceptionHandler.ErrorResponse) response.getBody();
-        assertEquals("An unexpected error occurred.", body.getMessage());
+        assertEquals("An unexpected error occurred: Internal server error", body.getMessage()); // Updated message format
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), body.getStatusCode());
     }
+
+
 
     @Test
     void testHandleValidationExceptions() {

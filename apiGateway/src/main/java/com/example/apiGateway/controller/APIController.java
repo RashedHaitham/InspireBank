@@ -4,6 +4,7 @@ import com.example.apiGateway.exception.UserNotFoundException;
 import com.example.apiGateway.model.AuthRequest;
 import com.example.apiGateway.model.AuthResponse;
 import com.example.apiGateway.model.User;
+import com.example.apiGateway.model.UserDTO;
 import com.example.apiGateway.service.GatewayService;
 import com.example.apiGateway.util.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,13 +70,8 @@ public class APIController {
 
     // GET /api/users - Get all users
     @GetMapping("/users")
-    public Mono<ResponseEntity<Flux<User>>> getAllUsers() {
+    public Mono<ResponseEntity<Flux<UserDTO>>> getAllUsers() {
         return gatewayService.getAllUsers();
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        return "test";
     }
 
     @DeleteMapping("/user/{username}")

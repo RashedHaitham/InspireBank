@@ -84,7 +84,7 @@ class PaymentServiceTest {
         assertEquals(2, payments.size());
         assertEquals(1L, payments.get(0).getId());
         assertEquals(2L, payments.get(1).getId());
-        verify(paymentRepository, times(1)).findByAccountNumber(accountNumber);
+        verify(paymentRepository, times(1)).findByAccountNumber(accountNumber); // Assert only one call
     }
 
 

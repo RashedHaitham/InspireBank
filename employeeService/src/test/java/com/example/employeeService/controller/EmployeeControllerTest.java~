@@ -107,8 +107,8 @@ class EmployeeControllerTest {
     void updateEmployee_shouldReturnUpdatedEmployee() throws Exception {
         // Arrange
         Long employeeId = 1L;
-        EmployeeCreationRequest request = new EmployeeCreationRequest("Rashed Updated", "rashed.updated@example.com", "Senior Developer");
-        Employee updatedEmployee = new Employee(1L, "rashed.updated@example.com", "Rashed Updated", "Senior Developer");
+        EmployeeCreationRequest request = new EmployeeCreationRequest("John Doe Updated", "john.updated@example.com", "Senior Developer");
+        Employee updatedEmployee = new Employee(1L, "John Doe Updated", "john.updated@example.com", "Senior Developer");
 
         when(employeeService.updateEmployee(eq(employeeId), any(EmployeeCreationRequest.class))).thenReturn(updatedEmployee);
 
@@ -118,8 +118,8 @@ class EmployeeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Rashed Updated"))
-                .andExpect(jsonPath("$.email").value("rashed.updated@example.com"))
+                .andExpect(jsonPath("$.name").value("John Doe Updated"))
+                .andExpect(jsonPath("$.email").value("john.updated@example.com"))
                 .andExpect(jsonPath("$.position").value("Senior Developer"));
     }
 

@@ -1,6 +1,8 @@
 package com.example.apiGateway.service;
 
 import com.example.apiGateway.util.JWTUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class JWTFilter implements WebFilter {
 
     private final JWTUtil jwtUtil;
+    private static final Logger log = LoggerFactory.getLogger(JWTFilter.class);
 
     public JWTFilter(JWTUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -60,12 +63,14 @@ public class JWTFilter implements WebFilter {
                         SecurityContext securityContext = new SecurityContextImpl(auth);
 
                         return chain.filter(exchange)
-                                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+                                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)))
+                                .doOnEach(signal -> log.debug("Reactive context during filter: {}", signal.getContextView()));
                     }
 
                     return chain.filter(exchange);
                 })
-                .switchIfEmpty(chain.filter(exchange));
+                .switchIfEmpty(chain.filter(exchange))
+                .doOnEach(signal -> log.debug("Signal context at end of filter: {}", signal.getContextView()));
     }
 
     private Optional<HttpCookie> getJwtTokenFromRequest(ServerHttpRequest request) {

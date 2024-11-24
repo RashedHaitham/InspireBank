@@ -64,7 +64,7 @@ public class PaymentService {
         if (account.isEmpty()){
             throw new NoSuchElementException("No payment history found for account number: " + accountNumber);
         }
-        return paymentRepository.findByAccountNumber(accountNumber);
+        return account;
     }
 
     public List<Payment> getAllPayments() {

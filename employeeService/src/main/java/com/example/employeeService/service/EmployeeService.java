@@ -42,7 +42,6 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    @CachePut(value = EMPLOYEE_CACHE, key = "#result.id")
     public void saveEmployees(MultipartFile file) throws IOException {
         List<Employee> employees = new ArrayList<>();
 
@@ -68,11 +67,9 @@ public class EmployeeService {
     @Cacheable(key = "#id", value = EMPLOYEE_CACHE)
     @Transactional(readOnly = true)
     public Employee getEmployeeById(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new EmployeeNotFoundException(id);
-        }
         System.out.println("No cache, getting employee " + id + " from the database...");
-        return employeeRepository.findById(id).orElse(null);
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
     }
 
     @Timed("employeeCacheGetAll")

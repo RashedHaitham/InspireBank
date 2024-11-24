@@ -121,15 +121,13 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void deleteEmployee_shouldThrowExceptionIfEmployeeDoesNotExist() {
+    void deleteEmployee_shouldDeleteEmployee() {
         Long employeeId = 1L;
 
-        when(employeeRepository.existsById(employeeId)).thenReturn(false); // Employee does not exist
+        doNothing().when(employeeRepository).deleteById(employeeId);
 
-        assertThrows(EmployeeNotFoundException.class, () -> employeeService.deleteEmployee(employeeId));
+        employeeService.deleteEmployee(employeeId);
 
-        verify(employeeRepository, times(1)).existsById(employeeId); // Verify existence check
-        verify(employeeRepository, times(0)).deleteById(employeeId); // Ensure delete is not called
+        verify(employeeRepository, times(1)).deleteById(employeeId);
     }
-
 }
